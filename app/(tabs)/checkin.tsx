@@ -45,15 +45,26 @@ type PatientLend = {
   items: (ItemDetail & { lendItemId: number; returnedAt: string | null })[];
 };
 
+const CHECKIN_CACHE: { entries: PatientLend[]; loadedAt: number } = {
+  entries: [],
+  loadedAt: 0,
+};
+
 export default function CheckinScreen() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(CHECKIN_CACHE.entries.length === 0);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
-  const [patientLends, setPatientLends] = useState<PatientLend[]>([]);
+  const [patientLends, setPatientLends] = useState<PatientLend[]>(CHECKIN_CACHE.entries);
   const [selectedPatient, setSelectedPatient] = useState<PatientLend | null>(null);
   const [returningItems, setReturningItems] = useState<Set<string>>(new Set());
 
   const loadActiveLends = useCallback(async () => {
-    setLoading(true);
+    const shouldBlock = CHECKIN_CACHE.entries.length === 0;
+    if (shouldBlock) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
 
     try {
       // Get all session_items where items haven't been returned yet
@@ -63,9 +74,7 @@ export default function CheckinScreen() {
         .is('returned_at', null);
 
       if (unreturnedError) {
-        Alert.alert('Load failed', unreturnedError.message);
-        setLoading(false);
-        return;
+        throw unreturnedError;
       }
 
       const unreturnedData = (unreturnedItems ?? []) as { session_id: number }[];
@@ -73,7 +82,8 @@ export default function CheckinScreen() {
 
       if (uniqueSessionIds.length === 0) {
         setPatientLends([]);
-        setLoading(false);
+        CHECKIN_CACHE.entries = [];
+        CHECKIN_CACHE.loadedAt = Date.now();
         return;
       }
 
@@ -85,9 +95,7 @@ export default function CheckinScreen() {
         .order('lended_at', { ascending: false });
 
       if (lendError) {
-        Alert.alert('Load failed', lendError.message);
-        setLoading(false);
-        return;
+        throw lendError;
       }
 
       const lends = (lendRows ?? []) as LendRecord[];
@@ -101,9 +109,7 @@ export default function CheckinScreen() {
         .is('returned_at', null);
 
       if (lendItemError) {
-        Alert.alert('Load failed', lendItemError.message);
-        setLoading(false);
-        return;
+        throw lendItemError;
       }
 
       const lendItems = (lendItemRows ?? []) as LendItem[];
@@ -112,7 +118,8 @@ export default function CheckinScreen() {
       const itemIds = lendItems.map((li) => li.l_item);
       if (itemIds.length === 0) {
         setPatientLends([]);
-        setLoading(false);
+        CHECKIN_CACHE.entries = [];
+        CHECKIN_CACHE.loadedAt = Date.now();
         return;
       }
 
@@ -122,9 +129,7 @@ export default function CheckinScreen() {
         .in('id', itemIds);
 
       if (itemError) {
-        Alert.alert('Load failed', itemError.message);
-        setLoading(false);
-        return;
+        throw itemError;
       }
 
       const items = (itemRows ?? []) as { id: string; serial_number: string; category_id: string }[];
@@ -133,7 +138,8 @@ export default function CheckinScreen() {
       const categoryIds = [...new Set(items.map((i) => i.category_id))];
       if (categoryIds.length === 0) {
         setPatientLends([]);
-        setLoading(false);
+        CHECKIN_CACHE.entries = [];
+        CHECKIN_CACHE.loadedAt = Date.now();
         return;
       }
 
@@ -143,9 +149,7 @@ export default function CheckinScreen() {
         .in('id', categoryIds);
 
       if (categoryError) {
-        Alert.alert('Load failed', categoryError.message);
-        setLoading(false);
-        return;
+        throw categoryError;
       }
 
       const categories = new Map(
@@ -186,12 +190,16 @@ export default function CheckinScreen() {
         });
       });
 
-      setPatientLends(Array.from(patientMap.values()));
+      const entries = Array.from(patientMap.values());
+      setPatientLends(entries);
+      CHECKIN_CACHE.entries = entries;
+      CHECKIN_CACHE.loadedAt = Date.now();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load active lends.';
-      Alert.alert('Error', message);
+      Alert.alert('Load failed', message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -342,6 +350,8 @@ export default function CheckinScreen() {
           />
         </View>
 
+        {refreshing ? <ActivityIndicator style={styles.refreshLoader} size="small" color="#0C8577" /> : null}
+
         {loading ? (
           <ActivityIndicator style={styles.loader} size="large" color="#0C8577" />
         ) : filteredPatients.length === 0 ? (
@@ -436,6 +446,10 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 40,
+  },
+  refreshLoader: {
+    marginTop: 2,
+    marginBottom: 8,
   },
   emptyContainer: {
     flex: 1,

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useHeaderHeight } from '@react-navigation/elements';
 import {
   ActivityIndicator,
   Alert,
@@ -46,6 +47,7 @@ const normalizeStatus = (status: string | null) => {
 export default function Checkout() {
   const router = useRouter();
   const { itemName } = useLocalSearchParams();
+  const headerHeight = useHeaderHeight();
 
   const initialSearch = useMemo(() => {
     if (Array.isArray(itemName)) return itemName[0] ?? '';
@@ -205,7 +207,8 @@ export default function Checkout() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
       style={styles.screen}
     >
       <Stack.Screen
@@ -216,7 +219,12 @@ export default function Checkout() {
         }}
       />
 
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.heroCard}>
           <Text style={styles.heroLabel}>Selected Equipment</Text>
           <Text style={styles.heroValue}>
@@ -258,7 +266,7 @@ export default function Checkout() {
           {loading ? (
             <ActivityIndicator style={styles.loader} color="#0C8577" />
           ) : (
-            <ScrollView style={styles.resultsList} nestedScrollEnabled>
+            <ScrollView style={styles.resultsList} nestedScrollEnabled keyboardShouldPersistTaps="handled">
               {filteredResults.slice(0, 8).map((item) => (
                 <View key={item.itemId}>
                   {(() => {

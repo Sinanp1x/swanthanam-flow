@@ -3,6 +3,7 @@ import { Stack, useRouter } from 'expo-router';
 import {
 	View,
 	Text,
+	ScrollView,
 	StyleSheet,
 	TextInput,
 	TouchableOpacity,
@@ -126,7 +127,10 @@ export default function Signup() {
 		>
 			<Stack.Screen options={{ title: 'Signup', headerShown: false }} />
 
-			<View style={styles.container}>
+			<ScrollView
+				contentContainerStyle={styles.container}
+				keyboardShouldPersistTaps="handled"
+			>
 				<Text style={styles.title}>Create Account</Text>
 				<Text style={styles.subtitle}>Register with your unit code</Text>
 
@@ -185,7 +189,7 @@ export default function Signup() {
 						<Text style={styles.linkText}>Already have an account? Login</Text>
 					</TouchableOpacity>
 				</View>
-			</View>
+			</ScrollView>
 		</KeyboardAvoidingView>
 	);
 }

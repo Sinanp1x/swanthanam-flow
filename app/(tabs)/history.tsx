@@ -41,13 +41,24 @@ type HistoryEntry = {
   items: (ItemDetail & { lendItemId: number; returnedAt: string | null })[];
 };
 
+const HISTORY_CACHE: { entries: HistoryEntry[]; loadedAt: number } = {
+  entries: [],
+  loadedAt: 0,
+};
+
 export default function History() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(HISTORY_CACHE.entries.length === 0);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>(HISTORY_CACHE.entries);
 
   const loadHistory = useCallback(async () => {
-    setLoading(true);
+    const shouldBlock = HISTORY_CACHE.entries.length === 0;
+    if (shouldBlock) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
 
     try {
       // Get ALL sessions (both active and completed)
@@ -57,9 +68,7 @@ export default function History() {
         .order('lended_at', { ascending: false });
 
       if (lendError) {
-        Alert.alert('Load failed', lendError.message);
-        setLoading(false);
-        return;
+        throw lendError;
       }
 
       const lends = (lendRows ?? []) as LendRecord[];
@@ -68,7 +77,8 @@ export default function History() {
       const lendIds = lends.map((l) => l.id);
       if (lendIds.length === 0) {
         setHistory([]);
-        setLoading(false);
+        HISTORY_CACHE.entries = [];
+        HISTORY_CACHE.loadedAt = Date.now();
         return;
       }
 
@@ -78,9 +88,7 @@ export default function History() {
         .in('session_id', lendIds);
 
       if (lendItemError) {
-        Alert.alert('Load failed', lendItemError.message);
-        setLoading(false);
-        return;
+        throw lendItemError;
       }
 
       const lendItems = (lendItemRows ?? []) as LendItem[];
@@ -90,7 +98,8 @@ export default function History() {
       if (itemIds.length === 0) {
         const entries = lends.map((lend) => ({ lend, items: [] }));
         setHistory(entries);
-        setLoading(false);
+        HISTORY_CACHE.entries = entries;
+        HISTORY_CACHE.loadedAt = Date.now();
         return;
       }
 
@@ -100,9 +109,7 @@ export default function History() {
         .in('id', itemIds);
 
       if (itemError) {
-        Alert.alert('Load failed', itemError.message);
-        setLoading(false);
-        return;
+        throw itemError;
       }
 
       const items = (itemRows ?? []) as { id: string; serial_number: string; category_id: string }[];
@@ -115,9 +122,7 @@ export default function History() {
         .in('id', categoryIds);
 
       if (categoryError) {
-        Alert.alert('Load failed', categoryError.message);
-        setLoading(false);
-        return;
+        throw categoryError;
       }
 
       const categories = new Map(
@@ -153,11 +158,14 @@ export default function History() {
       }));
 
       setHistory(entries);
+      HISTORY_CACHE.entries = entries;
+      HISTORY_CACHE.loadedAt = Date.now();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load history.';
-      Alert.alert('Error', message);
+      Alert.alert('Load failed', message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -285,6 +293,8 @@ export default function History() {
           />
         </View>
 
+        {refreshing ? <ActivityIndicator style={styles.refreshLoader} size="small" color="#0C8577" /> : null}
+
         {loading ? (
           <ActivityIndicator style={styles.loader} size="large" color="#0C8577" />
         ) : filteredHistory.length === 0 ? (
@@ -332,6 +342,10 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 40,
+  },
+  refreshLoader: {
+    marginTop: 2,
+    marginBottom: 8,
   },
   emptyContainer: {
     flex: 1,

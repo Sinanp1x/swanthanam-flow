@@ -6,12 +6,14 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    KeyboardAvoidingView,
     TouchableOpacity,
     ActivityIndicator,
     Alert,
     Modal,
     TextInput,
     Image,
+    Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../services/supabase';
@@ -374,7 +376,15 @@ export default function Profile() {
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+            keyboardShouldPersistTaps="handled"
+        >
             <Stack.Screen
                 options={{
                     title: 'Profile',
@@ -494,7 +504,7 @@ export default function Profile() {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView style={styles.modalBody}>
+                        <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
                             <Text style={styles.inputLabel}>Full Name *</Text>
                             <TextInput
                                 style={styles.input}
@@ -540,6 +550,7 @@ export default function Profile() {
                 </View>
             </Modal>
         </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
