@@ -1,50 +1,66 @@
-# Welcome to your Expo app 👋
+# Swanthanam Flow
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+![Swanthanam Flow Icon](assets/images/favicon.png)
 
-## Get started
+Swanthanam Flow is a stock recorder and tracking app built for the Swanthanam palliative initiative by SYS in Kerala.
+
+The app is designed to simplify local medical equipment lending operations, especially for items such as wheelchairs, oxygen cylinders, hospital beds, and other care equipment.
+
+It tracks:
+- Inventory categories and child items
+- Item status (available, lended, broken)
+- Checkout sessions linked to patients
+- Check-in and return flow by session period
+- Lending history for operational follow-up
+
+The goal is to replace rigorous manual log writing with a simple pocket workflow for volunteers and coordinators.
+
+## Important Scope Note
+
+This is not a general-purpose public app.
+
+Swanthanam Flow was developed specifically for one local branch in my village and is intended only for that focused operational context.
+
+## Tech Stack
+
+- Expo + React Native
+- Expo Go
+- Expo Router
+- Supabase (Auth, Postgres, Storage, RPC)
+- TypeScript
+
+### Tech Stack with Icons
+
+[![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
+[![Expo%20Go](https://img.shields.io/badge/Expo%20Go-1C1E24?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/go)
+[![React%20Native](https://img.shields.io/badge/React%20Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
+[![Expo%20Router](https://img.shields.io/badge/Expo%20Router-000020?style=for-the-badge&logo=expo&logoColor=white)](https://docs.expo.dev/router/introduction/)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+## Project Setup
 
 1. Install dependencies
 
-   ```bash
    npm install
-   ```
 
-2. Start the app
+2. Start development server
 
-   ```bash
    npx expo start
-   ```
 
-In the output, you'll find options to open the app in a
+3. Run lint checks
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   npm run lint
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Core Modules
 
-## Get a fresh project
+- Authentication: login and signup for committee use
+- Inventory: category and item management with image support
+- Checkout: assign equipment to patient under session
+- Check-in: return items and close session when complete
+- History: session-level lending records
+- Profile: user info, unit details, and profile image
 
-When you're ready, run:
+## Internal Use
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This app is maintained for practical field use in the Swanthanam workflow and tuned to local operational needs.
