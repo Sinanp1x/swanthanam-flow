@@ -17,6 +17,12 @@ The goal is to replace rigorous manual log writing with a simple pocket workflow
 
 ## Important Scope Note
 
+> ### 🛑 Private Project Disclaimer
+> This software is custom-built for a specific palliative care unit (**Swanthanam Flow**). It is shared here for **portfolio and educational purposes only**.
+> * **Usage:** Unauthorized use of this specific instance is prohibited.
+> * **No Warranty:** As a first-year engineering project, this is provided "as-is."
+> * **Contributions:** Not currently accepting public pull requests.
+
 This is not a general-purpose public app.
 
 Swanthanam Flow was developed specifically for one local branch in my village and is intended only for that focused operational context.

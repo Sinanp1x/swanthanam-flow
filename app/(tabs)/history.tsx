@@ -254,6 +254,7 @@ export default function History() {
               {item.returnedAt && (
                 <View style={styles.returnedBadge}>
                   <Text style={styles.returnedText}>Returned</Text>
+                  <Text style={styles.metaText}>{new Date(item.returnedAt).toLocaleDateString()}</Text>
                 </View>
               )}
             </View>

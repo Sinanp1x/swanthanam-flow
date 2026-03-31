@@ -43,4 +43,4 @@ app-example
 /ios
 /android
 
-supabase.ts
+.env
